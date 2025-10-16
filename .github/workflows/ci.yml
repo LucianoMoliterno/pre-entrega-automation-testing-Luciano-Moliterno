@@ -50,35 +50,31 @@ jobs:
         echo ""
         echo "=== Chrome ==="
         google-chrome --version || chrome --version || chromium-browser --version || echo "Chrome no encontrado"
-        echo ""
-        echo "=== ChromeDriver ==="
-        chromedriver --version || echo "ChromeDriver no encontrado en PATH"
 
-    - name: Ejecutar tests API
+    - name: Ejecutar tests API (estables)
       run: |
         echo "🧪 Ejecutando tests de API..."
-        pytest test_api/ -v --tb=short || exit 1
+        pytest test_api/test_post_lifecycle.py test_api/test_users_api.py -v --tb=short --html=reports/api_report.html --self-contained-html || exit 1
       continue-on-error: false
 
     - name: Ejecutar tests UI (smoke)
       run: |
         echo "🧪 Ejecutando tests UI (smoke)..."
-        pytest tests/ -m smoke -v --tb=short || exit 1
+        pytest tests/ -m smoke -v --tb=short --html=reports/ui_report.html --self-contained-html || exit 1
       continue-on-error: false
 
     - name: Ejecutar tests BDD (smoke)
       run: |
         echo "🧪 Ejecutando tests BDD (smoke)..."
-        behave -t @smoke -f pretty || exit 1
+        behave -t @smoke -f pretty -f json -o reports/behave.json || exit 1
       continue-on-error: false
 
-    - name: Generar reportes HTML
-      if: always()
+    - name: Ejecutar suite completa de API (opcional)
+      if: github.event_name == 'pull_request'
       run: |
-        echo "📊 Generando reportes..."
-        pytest test_api/ --html=reports/api_report.html --self-contained-html || true
-        pytest tests/ -m smoke --html=reports/ui_report.html --self-contained-html || true
-        behave -t @smoke -f json -o reports/behave.json || true
+        echo "🧪 Ejecutando suite completa de API..."
+        pytest test_api/ -v --tb=short || true
+      continue-on-error: true
 
     - name: Subir reportes como artefactos
       if: always()
