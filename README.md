@@ -3,7 +3,7 @@
 ## Autor: Luciano Moliterno
 ## QA Automation Engineer
 
-![CI Status](https://github.com/USUARIO/REPO/actions/workflows/ci.yml/badge.svg)
+![CI Status](https://github.com/LucianoMoliterno/pre-entrega-automation-testing-Luciano-Moliterno/actions/workflows/ci.yml/badge.svg)
 
 ---
 
