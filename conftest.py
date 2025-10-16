@@ -79,19 +79,24 @@ def pytest_html_results_table_header(cells):
 
 
 def pytest_html_results_table_row(report, cells):
-    """Personalizar filas de la tabla de resultados"""
-    cells.insert(2, html.td(report.description))
+    """Personalizar filas de la tabla de resultados (tolerante a CollectReport)"""
+    # Fallbacks seguros si no hay description durante la colección
+    description = getattr(report, 'description', None) or getattr(report, 'nodeid', '')
+    cells.insert(2, html.td(description))
     cells.insert(1, html.td(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), class_="col-time"))
 
-    # Determinar tipo de test basado en marcadores
+    # Determinar tipo de test basado en marcadores cuando aplique
     test_type = "General"
     if hasattr(report, 'keywords'):
-        if 'api' in report.keywords or 'test_api' in report.nodeid:
-            test_type = "API"
-        elif 'ui' in report.keywords or 'test_login' in report.nodeid or 'test_carrito' in report.nodeid:
-            test_type = "UI"
-        elif 'e2e' in report.keywords:
-            test_type = "E2E"
+        try:
+            if 'api' in report.keywords or 'test_api' in getattr(report, 'nodeid', ''):
+                test_type = "API"
+            elif 'ui' in report.keywords or any(k in getattr(report, 'nodeid', '') for k in ['test_login', 'test_carrito']):
+                test_type = "UI"
+            elif 'e2e' in report.keywords:
+                test_type = "E2E"
+        except Exception:
+            pass
 
     cells.insert(3, html.td(test_type))
 
@@ -165,21 +170,25 @@ def pytest_sessionstart(session):
 
 
 def pytest_sessionfinish(session, exitstatus):
-    """Hook ejecutado al final de la sesión de pruebas"""
-    logger.info("="*80)
-    logger.info("FINALIZACIÓN DE EJECUCIÓN DE PRUEBAS")
-    logger.info(f"Estado de salida: {exitstatus}")
+    """Hook ejecutado al final de la sesión de pruebas (tolerante a streams cerrados)"""
+    try:
+        logger.info("="*80)
+        logger.info("FINALIZACIÓN DE EJECUCIÓN DE PRUEBAS")
+        logger.info(f"Estado de salida: {exitstatus}")
 
-    # Resumen de resultados
-    if hasattr(session, 'testscollected'):
-        logger.info(f"Total de tests ejecutados: {session.testscollected}")
+        # Resumen de resultados
+        if hasattr(session, 'testscollected'):
+            logger.info(f"Total de tests ejecutados: {session.testscollected}")
 
-    if exitstatus == 0:
-        logger.info("Todos los tests pasaron exitosamente")
-    else:
-        logger.warning(f"Algunos tests fallaron (código: {exitstatus})")
+        if exitstatus == 0:
+            logger.info("Todos los tests pasaron exitosamente")
+        else:
+            logger.warning(f"Algunos tests fallaron (código: {exitstatus})")
 
-    logger.info("="*80)
+        logger.info("="*80)
+    except Exception:
+        # Evitar que un stream cerrado provoque INTERNALERROR en CI
+        pass
 
 
 @pytest.fixture
