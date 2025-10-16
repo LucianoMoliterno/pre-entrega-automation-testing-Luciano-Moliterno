@@ -112,13 +112,3 @@ class TestDataHelper:
             list: Lista de IDs
         """
         return [data.get(id_field, f"test_{i}") for i, data in enumerate(data_list)]
-username,password,expected_result,test_case
-standard_user,secret_sauce,success,Login exitoso con usuario válido
-locked_out_user,secret_sauce,locked,Usuario bloqueado
-problem_user,secret_sauce,success,Usuario con problemas visuales
-performance_glitch_user,secret_sauce,success,Usuario con problemas de performance
-invalid_user,wrong_password,error,Credenciales inválidas
-standard_user,wrong_password,error,Contraseña incorrecta
-,secret_sauce,error,Usuario vacío
-standard_user,,error,Contraseña vacía
-
