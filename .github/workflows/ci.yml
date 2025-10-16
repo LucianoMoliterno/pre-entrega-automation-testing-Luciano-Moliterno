@@ -1,233 +1,73 @@
-name: CI TalentoLab - Framework Testing Completo
+name: CI TalentoLab
 
-# Ejecutar en push a main/develop y en Pull Requests
 on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
-  workflow_dispatch:  # Permite ejecución manual
-
-# Permisos necesarios
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  test-framework:
-    name: Tests UI + API + BDD
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    strategy:
-      matrix:
-        python-version: ['3.11']
-
-    steps:
-      # 1. Checkout del código
-      - name: 📥 Checkout código
-        uses: actions/checkout@v4
-
-      # 2. Configurar Python
-      - name: 🐍 Configurar Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-
-      # 3. Instalar dependencias
-      - name: 📦 Instalar dependencias
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      # 4. Instalar Chrome y ChromeDriver
-      - name: 🌐 Instalar Chrome y ChromeDriver
-        uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: stable
-
-      - name: 🔧 Configurar ChromeDriver
-        run: |
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          echo "Chrome version: $CHROME_VERSION"
-          wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE" -O chrome_version
-          CHROMEDRIVER_VERSION=$(cat chrome_version)
-          echo "ChromeDriver version: $CHROMEDRIVER_VERSION"
-          wget -q "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip -q chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-          chromedriver --version
-
-      # 5. Crear directorios necesarios
-      - name: 📁 Crear directorios de reportes y logs
-        run: |
-          mkdir -p reports
-          mkdir -p reports/screens
-          mkdir -p reports/junit
-          mkdir -p logs
-          mkdir -p screenshots
-
-      # 6. Ejecutar Tests Smoke (UI + API + BDD)
-      - name: 🔥 Ejecutar Tests @smoke
-        continue-on-error: false
-        run: |
-          echo "=== Ejecutando Tests Smoke Críticos ==="
-          pytest -m smoke -v --tb=short --html=reports/smoke_report.html --self-contained-html
-          
-          echo "=== Ejecutando Tests BDD @smoke con Behave ==="
-          behave -t @smoke -f json -o reports/behave_smoke.json -f pretty --no-capture || true
-        env:
-          DISPLAY: :99
-
-      # 7. Ejecutar Tests de API
-      - name: 🔌 Ejecutar Tests de API
-        continue-on-error: true
-        run: |
-          echo "=== Ejecutando Suite de Tests API ==="
-          pytest test_api/ -v --tb=short --html=reports/api_report.html --self-contained-html
-
-      # 8. Ejecutar Tests UI completos
-      - name: 🖥️ Ejecutar Tests UI (SauceDemo)
-        continue-on-error: true
-        run: |
-          echo "=== Ejecutando Suite de Tests UI ==="
-          pytest tests/ -v --tb=short --html=reports/ui_report.html --self-contained-html
-        env:
-          DISPLAY: :99
-
-      # 9. Ejecutar Tests BDD completos
-      - name: 🎭 Ejecutar Tests BDD con Behave
-        continue-on-error: true
-        run: |
-          echo "=== Ejecutando Suite Completa BDD ==="
-          behave -f json -o reports/behave_all.json -f pretty --junit --junit-directory reports/junit --no-capture || true
-
-      # 10. Generar reporte consolidado
-      - name: 📊 Generar reporte consolidado
-        if: always()
-        run: |
-          echo "=== Resumen de Ejecución ===" > reports/summary.txt
-          echo "Fecha: $(date)" >> reports/summary.txt
-          echo "Commit: ${{ github.sha }}" >> reports/summary.txt
-          echo "Branch: ${{ github.ref }}" >> reports/summary.txt
-          echo "" >> reports/summary.txt
-          echo "Tests ejecutados:" >> reports/summary.txt
-          echo "- Tests Smoke (@smoke)" >> reports/summary.txt
-          echo "- Tests API (JSONPlaceholder)" >> reports/summary.txt
-          echo "- Tests UI (SauceDemo)" >> reports/summary.txt
-          echo "- Tests BDD (Behave)" >> reports/summary.txt
-          cat reports/summary.txt
-
-      # 11. Subir reportes HTML como artefactos
-      - name: 📤 Subir Reportes HTML
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-reports
-          path: |
-            reports/*.html
-            reports/assets/
-          retention-days: 90
-
-      # 12. Subir reportes BDD JSON
-      - name: 📤 Subir Reportes BDD JSON
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: bdd-reports
-          path: |
-            reports/*.json
-            reports/junit/
-          retention-days: 90
-
-      # 13. Subir logs
-      - name: 📤 Subir Logs de Ejecución
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-logs
-          path: |
-            logs/*.log
-            reports/summary.txt
-          retention-days: 90
-
-      # 14. Subir screenshots de fallos
-      - name: 📤 Subir Screenshots
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: screenshots
-          path: |
-            screenshots/*.png
-            reports/screens/*.png
-          retention-days: 90
-
-      # 15. Publicar resultados de tests
-      - name: 📋 Publicar Resultados de Tests
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: |
-            reports/junit/*.xml
-          check_name: Test Results
-          comment_title: Resultados de Tests
-
-      # 16. Comentar en PR con resumen
-      - name: 💬 Comentar en PR
-        if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const summary = fs.readFileSync('reports/summary.txt', 'utf8');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## 🤖 Resumen de Tests Automatizados\n\n\`\`\`\n${summary}\n\`\`\`\n\n✅ Los artefactos están disponibles en la pestaña "Actions" por 90 días.`
-            });
-
-      # 17. Verificar que tests smoke pasaron
-      - name: ✅ Verificar Tests Smoke
-        run: |
-          if [ -f "reports/smoke_report.html" ]; then
-            echo "✓ Tests smoke completados"
-            # El workflow falla si los tests smoke fallan (continue-on-error: false en step 6)
-          else
-            echo "✗ No se generó reporte de tests smoke"
-            exit 1
-          fi
-
-  # Job adicional para validar código
-  code-quality:
-    name: Validación de Calidad
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout código
-        uses: actions/checkout@v4
+    - name: Checkout código
+      uses: actions/checkout@v3
 
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Configurar Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: 📦 Instalar dependencias de calidad
-        run: |
-          pip install flake8 pylint
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: 🔍 Análisis estático con flake8
-        continue-on-error: true
-        run: |
-          # Análisis básico ignorando algunas reglas comunes
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Instalar Chrome y ChromeDriver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
-      - name: 📊 Generar badge de estado
-        if: always()
-        run: |
-          echo "Badge de estado generado automáticamente por GitHub Actions"
+    - name: Ejecutar tests API
+      run: |
+        pytest test_api/ -v --html=reports/api_report.html --self-contained-html
+      continue-on-error: false
+
+    - name: Ejecutar tests UI (smoke)
+      run: |
+        pytest tests/ -m smoke -v --html=reports/ui_report.html --self-contained-html
+      continue-on-error: false
+
+    - name: Ejecutar tests BDD (smoke)
+      run: |
+        behave -t @smoke -f json -o reports/behave.json -f pretty
+      continue-on-error: false
+
+    - name: Ejecutar suite completa de regresión
+      if: github.event_name == 'pull_request'
+      run: |
+        pytest tests/ -v --html=reports/regression_report.html --self-contained-html
+        behave -t @regression -f json -o reports/behave_regression.json
+      continue-on-error: true
+
+    - name: Subir reportes como artefactos
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: |
+          reports/
+          logs/
+          screenshots/
+        retention-days: 90
+
+    - name: Mostrar resumen de tests
+      if: always()
+      run: |
+        echo "✅ Tests completados"
+        echo "📊 Los reportes están disponibles en la pestaña Artifacts"
 
