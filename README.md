@@ -5,6 +5,8 @@
 
 ![CI Status](https://github.com/LucianoMoliterno/pre-entrega-automation-testing-Luciano-Moliterno/actions/workflows/ci.yml/badge.svg)
 
+> ✅ **CI/CD Pipeline Activo** - Tests automatizados ejecutándose en cada push
+
 ---
 
 ## 📋 Descripción
@@ -459,4 +461,3 @@ Este proyecto es parte de un trabajo académico de QA Automation.
 ---
 
 _Última actualización: Octubre 2025_
-
