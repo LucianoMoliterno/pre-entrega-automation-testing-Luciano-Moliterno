@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Reportes generados (mantener carpeta con .gitkeep)
+reports/*.html
+reports/assets/*.css
+!reports/.gitkeep
+
+# Logs generados (mantener carpeta con .gitkeep)
+logs/*.log
+!logs/.gitkeep
+
+# Screenshots generados
+screenshots/*.png
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Selenium
+chromedriver
+geckodriver
+
