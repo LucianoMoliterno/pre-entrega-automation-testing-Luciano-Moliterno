@@ -112,12 +112,12 @@ def pytest_runtest_makereport(item, call):
         test_name = item.nodeid
 
         if report.passed:
-            logger.info(f"✓ PASSED: {test_name}")
+            logger.info(f"PASSED: {test_name}")
         elif report.failed:
-            logger.error(f"✗ FAILED: {test_name}")
+            logger.error(f"FAILED: {test_name}")
             logger.error(f"  Error: {report.longreprtext}")
         elif report.skipped:
-            logger.warning(f"⊘ SKIPPED: {test_name}")
+            logger.warning(f"SKIPPED: {test_name}")
 
     # Captura de screenshot para tests UI que fallan
     if report.failed and report.when == "call":
@@ -145,8 +145,13 @@ def pytest_runtest_makereport(item, call):
                 # Agregar screenshot al reporte HTML
                 if hasattr(report, 'extra'):
                     extra = getattr(report, 'extra', [])
-                    extra.append(pytest_html.extras.image(str(screenshot_path)))
-                    report.extra = extra
+                    # Evita dependencia directa de pytest_html.extras si no está disponible
+                    try:
+                        import pytest_html  # type: ignore
+                        extra.append(pytest_html.extras.image(str(screenshot_path)))
+                        report.extra = extra
+                    except Exception:
+                        pass
 
             except Exception as e:
                 logger.error(f"Error al capturar screenshot: {e}")
@@ -170,9 +175,9 @@ def pytest_sessionfinish(session, exitstatus):
         logger.info(f"Total de tests ejecutados: {session.testscollected}")
 
     if exitstatus == 0:
-        logger.info("✓ Todos los tests pasaron exitosamente")
+        logger.info("Todos los tests pasaron exitosamente")
     else:
-        logger.warning(f"✗ Algunos tests fallaron (código: {exitstatus})")
+        logger.warning(f"Algunos tests fallaron (código: {exitstatus})")
 
     logger.info("="*80)
 
@@ -201,6 +206,7 @@ def driver():
 
     logger.info("Configurando ChromeDriver...")
 
+    driver = None
     try:
         # Inicializar el WebDriver
         if is_ci:
