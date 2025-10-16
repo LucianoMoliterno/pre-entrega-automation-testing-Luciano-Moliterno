@@ -23,29 +23,36 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
+        cache: 'pip'
 
     - name: Crear carpetas necesarias
       run: |
-        mkdir -p reports logs screenshots
+        mkdir -p reports logs screenshots reports/screens
 
-    - name: Instalar dependencias
+    - name: Instalar dependencias de Python
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Instalar Chrome y ChromeDriver
+    - name: Setup Chrome y ChromeDriver
+      uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: stable
+
+    - name: Verificar instalaciones
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip google-chrome-stable
+        python --version
+        pip list | grep -E "pytest|selenium|behave|requests"
+        google-chrome --version || chrome --version || chromium-browser --version
 
     - name: Ejecutar tests API
       run: |
-        pytest test_api/ -v --html=reports/api_report.html --self-contained-html
+        pytest test_api/ -v --html=reports/api_report.html --self-contained-html --tb=short
       continue-on-error: false
 
     - name: Ejecutar tests UI (smoke)
       run: |
-        pytest tests/ -m smoke -v --html=reports/ui_report.html --self-contained-html
+        pytest tests/ -m smoke -v --html=reports/ui_report.html --self-contained-html --tb=short
       continue-on-error: false
 
     - name: Ejecutar tests BDD (smoke)
@@ -64,7 +71,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with:
-        name: test-reports
+        name: test-reports-${{ github.run_number }}
         path: |
           reports/
           logs/
@@ -76,3 +83,4 @@ jobs:
       run: |
         echo "✅ Tests completados"
         echo "📊 Los reportes están disponibles en la pestaña Artifacts"
+        echo "🔢 Run número: ${{ github.run_number }}"
