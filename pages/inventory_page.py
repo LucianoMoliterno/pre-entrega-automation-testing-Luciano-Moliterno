@@ -3,7 +3,8 @@ Page Object para la página de Inventario/Catálogo
 """
 from selenium.webdriver.common.by import By
 from pages.base_page import BasePage
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class InventoryPage(BasePage):
@@ -57,14 +58,33 @@ class InventoryPage(BasePage):
             return None
 
     def add_product_to_cart(self, product_index=0):
-        """Añade un producto al carrito por índice"""
+        """Añade un producto al carrito por índice (robusto para headless)"""
         try:
-            buttons = self.find_elements(self.ADD_TO_CART_BUTTONS)
-            if buttons and product_index < len(buttons):
-                print(f"[OK] Agregando producto {product_index + 1} al carrito")
-                buttons[product_index].click()
+            # Contar cuántos "Remove" hay antes de agregar
+            pre_remove_count = len(self.find_elements(self.REMOVE_BUTTONS))
+
+            # Localizador indexado del botón "Add to cart"
+            indexed_add_locator = (By.XPATH, f"(//button[contains(text(), 'Add to cart')])[{product_index + 1}]")
+
+            # Esperar a que sea cliqueable, hacer scroll y click JS (más estable en headless)
+            button = self.wait.until(EC.element_to_be_clickable(indexed_add_locator))
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
+            self.driver.execute_script("arguments[0].click();", button)
+
+            # Esperar a que aparezca un botón "Remove" adicional (confirmación de agregado)
+            def remove_count_increased(driver):
+                return len(self.find_elements(self.REMOVE_BUTTONS)) > pre_remove_count
+
+            try:
+                self.wait.until(lambda d: remove_count_increased(d))
                 return True
-            return False
+            except TimeoutException:
+                # Como fallback, verificar si el badge del carrito apareció
+                try:
+                    self.wait.until(EC.presence_of_element_located(self.CART_BADGE))
+                    return True
+                except TimeoutException:
+                    return False
         except Exception as e:
             print(f"[ERROR] Error al agregar producto: {e}")
             return False
@@ -78,9 +98,14 @@ class InventoryPage(BasePage):
             return 0
 
     def click_cart(self):
-        """Hace clic en el ícono del carrito"""
+        """Hace clic en el ícono del carrito y espera navegación"""
         print("[OK] Navegando al carrito")
         self.click(self.CART_LINK)
+        # Esperar a que cargue la URL del carrito
+        try:
+            self.wait.until(EC.url_contains("cart.html"))
+        except TimeoutException:
+            pass
 
     def is_menu_button_present(self):
         """Verifica si el botón del menú está presente"""
