@@ -2,14 +2,18 @@ name: CI TalentoLab
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master, main ]
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    env:
+      HEADLESS: true
+      CI: true
 
     steps:
     - name: Checkout código
@@ -20,6 +24,10 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Crear carpetas necesarias
+      run: |
+        mkdir -p reports logs screenshots
+
     - name: Instalar dependencias
       run: |
         python -m pip install --upgrade pip
@@ -28,9 +36,7 @@ jobs:
     - name: Instalar Chrome y ChromeDriver
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+        sudo apt-get install -y wget unzip google-chrome-stable
 
     - name: Ejecutar tests API
       run: |
@@ -70,4 +76,3 @@ jobs:
       run: |
         echo "✅ Tests completados"
         echo "📊 Los reportes están disponibles en la pestaña Artifacts"
-

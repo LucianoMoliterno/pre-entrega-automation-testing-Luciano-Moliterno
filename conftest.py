@@ -192,25 +192,29 @@ def driver():
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
     # Detectar si estamos en CI (GitHub Actions)
-    is_ci = os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true'
+    is_ci = os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true' or os.environ.get('HEADLESS') == 'true'
 
     if is_ci:
         logger.info("Ejecutando en entorno CI - Configurando modo headless")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--window-size=1920,1080")
-        CHROME_DRIVER_PATH = "/usr/local/bin/chromedriver"  # Linux CI
-    else:
-        logger.info("Ejecutando en entorno local")
-        CHROME_DRIVER_PATH = r"C:\chromedriver\chromedriver.exe"  # Windows local
 
     logger.info("Configurando ChromeDriver...")
 
     try:
         # Inicializar el WebDriver
-        driver = webdriver.Chrome(
-            service=Service(CHROME_DRIVER_PATH),
-            options=chrome_options
-        )
+        if is_ci:
+            # En CI, usar el driver del sistema
+            driver = webdriver.Chrome(options=chrome_options)
+        else:
+            # En local, usar la ruta específica
+            logger.info("Ejecutando en entorno local")
+            CHROME_DRIVER_PATH = r"C:\chromedriver\chromedriver.exe"
+            driver = webdriver.Chrome(
+                service=Service(CHROME_DRIVER_PATH),
+                options=chrome_options
+            )
+
         driver.implicitly_wait(10)
 
         logger.info("ChromeDriver iniciado exitosamente")
