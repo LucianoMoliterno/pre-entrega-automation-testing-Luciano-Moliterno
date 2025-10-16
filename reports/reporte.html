@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <title>Reporte de Pruebas - Saucedemo Automation</title>
+    <title>Reporte de Pruebas - Saucedemo Automation (POM)</title>
     <style>body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 12px;
@@ -438,11 +438,11 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
     notFoundMessage.hidden = !allRowsHidden;
 }
 </script>
-    <h1>Reporte de Pruebas - Saucedemo Automation</h1>
-    <p>Report generated on 11-Sep-2025 at 20:45:22 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
+    <h1>Reporte de Pruebas - Saucedemo Automation (POM)</h1>
+    <p>Report generated on 16-Oct-2025 at 00:15:44 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.2.0</p>
     <h2>Summary</h2>
-    <p>3 tests ran in 60.61 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">3 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>5 tests ran in 3.97 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">5 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -458,62 +458,134 @@ function filterTable(elem) { // eslint-disable-line no-unused-vars
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-time">2025-09-11 20:45:22.294588</td>
-          <td class="col-name">tests/test_saucedemo.py::TestSauceDemo::test_login_exitoso</td>
-          <td>Test 1: Login exitoso con credenciales válidas</td>
-          <td class="col-duration">13.56</td>
+          <td class="col-time">2025-10-16 00:15:44.264433</td>
+          <td class="col-name">test_api/test_post_lifecycle.py::test_post_lifecycle</td>
+          <td>
+    Test E2E del ciclo de vida completo de un post
+    1. CREATE: POST /posts con datos generados por Faker
+    2. UPDATE: PATCH /posts/{id} actualizando el título
+    3. DELETE: DELETE /posts/{id} y validar respuesta
+    Incluye validaciones de esquema, tipos y tiempos de respuesta
+    </td>
+          <td class="col-duration">0.91</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="6">
-            <div class="log"> -----------------------------Captured stdout setup------------------------------ <br/> Iniciando ChromeDriver...
- Navegando a saucedemo.com...
-<br/> ------------------------------Captured stdout call------------------------------ <br/> Intentando login con usuario: standard_user
- Credenciales ingresadas, haciendo click en login...
- Captura guardada: screenshots/test_login_exitoso_20250911_204430.png
- Test 1 completado: Login exitoso
-<br/> ----------------------------Captured stdout teardown---------------------------- <br/> Cerrando navegador...
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>
+[PASO 1] Creando post con Faker...
+  - Titulo: Nobis maxime architecto maxime veniam.
+  - Body: Illo pariatur nihil laborum quis numquam ad. Cupid...
+  - UserId: 3
+  [OK] POST completado en 0.253 segundos
+  [OK] Post creado exitosamente con ID: 101
+  [OK] Validaciones de esquema y tipos: PASSED
+
+[PASO 2] Actualizando post ID 101 con PATCH...
+  - Nuevo titulo: Titulo actualizado por QA
+  [OK] PATCH completado en 0.154 segundos
+  [OK] Post actualizado exitosamente
+  [OK] Titulo actualizado a: Titulo actualizado por QA
+  [OK] Validaciones de esquema y tipos: PASSED
+
+[PASO 3] Eliminando post ID 101...
+  [OK] DELETE completado en 0.157 segundos
+  [OK] Post ID 101 eliminado exitosamente
+
+============================================================
+RESUMEN DEL TEST E2E - CICLO DE VIDA COMPLETO
+============================================================
+[OK] POST /posts - Status 201 - Tiempo: 0.253s
+[OK] PATCH /posts/101 - Status 200 - Tiempo: 0.154s
+[OK] DELETE /posts/101 - Status 200 - Tiempo: 0.157s
+[OK] Tiempo total del ciclo: 0.564s
+============================================================
+[OK] Todas las validaciones pasaron exitosamente
+     - Esquemas validados
+     - Tipos de datos validados
+     - Tiempos de respuesta validados
+============================================================
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-time">2025-09-11 20:45:22.294588</td>
-          <td class="col-name">tests/test_saucedemo.py::TestSauceDemo::test_navegacion_catalogo</td>
-          <td>Test 2: Navegación y verificación del catálogo</td>
-          <td class="col-duration">15.32</td>
+          <td class="col-time">2025-10-16 00:15:44.264433</td>
+          <td class="col-name">test_api/test_post_lifecycle.py::test_post_lifecycle_multiple[1]</td>
+          <td>
+    Test E2E parametrizado para crear y eliminar múltiples posts
+    Valida que el framework soporta operaciones CRUD a escala
+    </td>
+          <td class="col-duration">0.39</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="6">
-            <div class="log"> -----------------------------Captured stdout setup------------------------------ <br/> Iniciando ChromeDriver...
- Navegando a saucedemo.com...
-<br/> ------------------------------Captured stdout call------------------------------ <br/> Intentando login con usuario: standard_user
- Credenciales ingresadas, haciendo click en login...
- Título de página correcto: Swag Labs
- Productos encontrados: 6
- Primer producto: Sauce Labs Backpack - Precio: $29.99
- Captura guardada: screenshots/test_navegacion_catalogo_20250911_204445.png
- Test 2 completado: Navegación del catálogo
-<br/> ----------------------------Captured stdout teardown---------------------------- <br/> Cerrando navegador...
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>
+[TEST] Creando y eliminando 1 post(s)...
+  [OK] Post 1/1 creado con ID: 101
+  [OK] Post ID 101 eliminado
+[OK] Test completado: 1 post(s) creados y eliminados exitosamente
 <br/></div></td></tr></tbody>
       <tbody class="passed results-table-row">
         <tr>
           <td class="col-result">Passed</td>
-          <td class="col-time">2025-09-11 20:45:22.294588</td>
-          <td class="col-name">tests/test_saucedemo.py::TestSauceDemo::test_agregar_producto_carrito</td>
-          <td>Test 3: Agregar producto al carrito y verificar</td>
-          <td class="col-duration">31.54</td>
+          <td class="col-time">2025-10-16 00:15:44.265439</td>
+          <td class="col-name">test_api/test_post_lifecycle.py::test_post_lifecycle_multiple[2]</td>
+          <td>
+    Test E2E parametrizado para crear y eliminar múltiples posts
+    Valida que el framework soporta operaciones CRUD a escala
+    </td>
+          <td class="col-duration">0.72</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="6">
-            <div class="log"> -----------------------------Captured stdout setup------------------------------ <br/> Iniciando ChromeDriver...
- Navegando a saucedemo.com...
-<br/> ------------------------------Captured stdout call------------------------------ <br/> Intentando login con usuario: standard_user
- Credenciales ingresadas, haciendo click en login...
- Contador inicial del carrito: 0
- Agregando producto 1 al carrito...
- Contador después de agregar: 1
- Navegando al carrito...
- Productos en carrito: 1
- Captura guardada: screenshots/test_agregar_producto_carrito_20250911_204517.png
- Test 3 completado: Producto agregado al carrito
-<br/> ----------------------------Captured stdout teardown---------------------------- <br/> Cerrando navegador...
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>
+[TEST] Creando y eliminando 2 post(s)...
+  [OK] Post 1/2 creado con ID: 101
+  [OK] Post 2/2 creado con ID: 101
+  [OK] Post ID 101 eliminado
+  [OK] Post ID 101 eliminado
+[OK] Test completado: 2 post(s) creados y eliminados exitosamente
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-time">2025-10-16 00:15:44.265439</td>
+          <td class="col-name">test_api/test_post_lifecycle.py::test_post_lifecycle_multiple[3]</td>
+          <td>
+    Test E2E parametrizado para crear y eliminar múltiples posts
+    Valida que el framework soporta operaciones CRUD a escala
+    </td>
+          <td class="col-duration">1.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="6">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>
+[TEST] Creando y eliminando 3 post(s)...
+  [OK] Post 1/3 creado con ID: 101
+  [OK] Post 2/3 creado con ID: 101
+  [OK] Post 3/3 creado con ID: 101
+  [OK] Post ID 101 eliminado
+  [OK] Post ID 101 eliminado
+  [OK] Post ID 101 eliminado
+[OK] Test completado: 3 post(s) creados y eliminados exitosamente
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-time">2025-10-16 00:15:44.265439</td>
+          <td class="col-name">test_api/test_post_lifecycle.py::test_post_lifecycle_with_validation_errors</td>
+          <td>
+    Test E2E que valida manejo de errores en el ciclo de vida
+    Intenta operaciones con datos inválidos
+    </td>
+          <td class="col-duration">0.39</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="6">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>
+[TEST] Validando manejo de errores...
+  - Intentando PATCH a post inexistente...
+  [OK] Manejo de PATCH a recurso inexistente validado
+  - Intentando DELETE a post inexistente...
+  [OK] Manejo de DELETE a recurso inexistente validado
+[OK] Validaciones de manejo de errores completadas
 <br/></div></td></tr></tbody></table></body></html>

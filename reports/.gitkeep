@@ -1,0 +1,3 @@
+# Este archivo asegura que la carpeta reports/ sea versionada en Git
+# Los reportes HTML se generarán automáticamente durante la ejecución de las pruebas
+
